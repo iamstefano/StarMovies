@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StarMovies - The Cinephile Galaxy ✨</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="/assets/images/favicon/favicon.ico"
+    />
+    <link rel="stylesheet" href="./css/app.css" />
+    <script src="./js/app.js" type="module"></script>
+  </head>
+  <body>
+    <main>
+      <div class="page">
+        <div class="mainContainer">
+          <!-- header -->
+          <header>
+            <div class="containerHeader">
+              <div class="mainLogo">
+                <h1>
+                  <a href="index.html" title="StarMovies">
+                    <div class="logoWrapper">
+                      <img
+                        src="./assets/images/logo_transparent.png"
+                        alt="logo-star-movies"
+                      />
+                    </div>
+                  </a>
+                </h1>
+              </div>
+
+              <div class="nav_wrapper">
+                <ul class="nav_ul">
+                  <li>
+                    <a class="navLink" href="#" title=" ">Home</a>
+                  </li>
+                  <li>
+                    <a class="navLink" href="#" title=" ">TV Shows</a>
+                  </li>
+                  <li>
+                    <a class="navLink" href="#" title=" ">Movies</a>
+                  </li>
+                  <li>
+                    <a class="navLink" href="#" title=" ">News & Popular</a>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="search_wrapper">
+                <form id="form_Search">
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    id="search"
+                    class="search"
+                  />
+                </form>
+              </div>
+            </div>
+          </header>
+
+          <!-- end header -->
+
+          <!-- content -->
+          <div class="mainContent">
+            <section id="trending">
+              <div class="container_trending">
+                <div class="title_trending">
+                  <h1>Trending</h1>
+                </div>
+              </div>
+              <div class="row">
+                <div class="poster_container trending_container"></div>
+              </div>
+            </section>
+
+            <section id="popular">
+              <div class="container_popular">
+                <div class="title_popular">
+                  <h1>Popular</h1>
+                </div>
+              </div>
+              <div class="row">
+                <div class="poster_container popular_container"></div>
+              </div>
+            </section>
+
+            <section id="rated">
+              <div class="container_rated">
+                <div class="title_rated">
+                  <h1>High Rated</h1>
+                </div>
+              </div>
+              <div class="row">
+                <div class="poster_container rated_container"></div>
+              </div>
+            </section>
+
+            <!-- end content -->
+          </div>
+          <footer>
+            <section class="footer">
+              <p class="copyright">Copyright 2023 || Edgemony ✨</p>
+            </section>
+          </footer>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
