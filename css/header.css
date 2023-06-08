@@ -1,6 +1,6 @@
-.containerHeader {
+header {
   display: flex;
-  /*   flex-direction: column; */
+  /* flex-direction: column; */
   justify-content: space-between;
   align-items: center;
   gap: 10px;
@@ -14,8 +14,20 @@
   display: flex;
   justify-content: flex-start;
   cursor: pointer;
+  width: auto;
+  height: 100px;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.25s ease;
 }
 
+.containerHeader .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  width: 100%;
+}
 .logoWrapper {
   width: auto;
   height: 100px;
@@ -64,10 +76,4 @@
 
 .navLink:hover {
   background-color: var(--color-hover);
-}
-
-.search_wrapper {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
 }

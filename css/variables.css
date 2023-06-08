@@ -1,8 +1,10 @@
 :root {
   --color-black: #000000;
   --color-text: #e7e9ea;
-  --color-text-red: #f9183d;
+  --color-text-red: #eb0e33;
   --color-hover: rgba(239, 243, 244, 0.1);
   --color-brand: #f15a54;
   --color-border: rgba(239, 243, 244, 0.2);
+  --color-primary: #020d18;
+  --color-secondary: var(--color-brand);
 }

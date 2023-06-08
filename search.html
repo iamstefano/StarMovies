@@ -5,27 +5,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StarMovies - The Cinephile Galaxy ✨</title>
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="/assets/images/favicon/favicon.ico"
-    />
     <link rel="stylesheet" href="lib/fontawesome.css" />
-    <link rel="stylesheet" href="./css/app.css" />
-    <script src="./js/app.js" type="module"></script>
+    <link rel="stylesheet" href="css/app.css" />
+    <script src="/js/app.js" defer></script>
   </head>
   <body>
-    <!-- <div class="mainContainer"> -->
-    <!-- header -->
     <header class="containerHeader">
       <div class="container">
         <div class="mainLogo">
           <a href="/">
             <div class="logoWrapper">
-              <img
-                src="./assets/images/logo_transparent.png"
-                alt="logo-star-movies"
-              />
+              <img src="./assets/images/logo.png" alt="logo-star-movies" />
             </div>
           </a>
         </div>
@@ -41,23 +31,12 @@
         </div>
       </div>
     </header>
-    <!-- end header -->
-
-    <!-- content -->
-    <!-- Now Playing Section -->
-    <section class="now-playing">
-      <h2>Now Playing</h2>
-      <div class="swiper">
-        <div class="swiper-wrapper"></div>
-      </div>
-    </section>
 
     <!-- Search Movies -->
     <section class="search">
       <div class="container">
         <div id="alert"></div>
         <form action="/search.html" class="search-form">
-          <!-- movies and shows radio box -->
           <div class="search-radio">
             <input type="radio" id="movie" name="type" value="movie" checked />
             <label for="movies">Movies</label>
@@ -67,7 +46,7 @@
               type="text"
               name="search-term"
               id="search-term"
-              placeholder="Search a movie..."
+              placeholder="Enter search term"
             />
             <button class="btn" type="submit">
               <i class="fas fa-search"></i>
@@ -77,20 +56,20 @@
       </div>
     </section>
 
-    <!-- Popular Movies -->
-    <section class="container">
-      <h2>Popular Movies</h2>
-      <div id="popular-movies" class="grid"></div>
+    <!-- Search Results -->
+    <section id="search-results-wrapper" class="container">
+      <heading id="search-results-heading"></heading>
+      <div id="search-results" class="grid"></div>
+      <div id="pagination"></div>
     </section>
 
-    <!-- end content -->
-
-    <!-- footer -->
+    <!-- Footer -->
     <footer>
       <section class="footer">
         <p class="copyright">Copyright 2023 || Edgemony ✨</p>
       </section>
     </footer>
+
     <div class="spinner"></div>
   </body>
 </html>
