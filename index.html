@@ -10,8 +10,8 @@
       type="image/x-icon"
       href="/assets/images/favicon/favicon.ico"
     />
-    <link rel="stylesheet" href="lib/fontawesome.css" />
     <link rel="stylesheet" href="./css/app.css" />
+    <script src="https://use.fontawesome.com/e2a1ad3188.js"></script>
     <script src="./js/app.js" type="module"></script>
   </head>
   <body>
@@ -35,6 +35,9 @@
               <a class="navLink" href="/">Movies</a>
             </li>
             <li>
+              <a class="navLink" href="/shows.html">TV Shows</a>
+            </li>
+            <li>
               <a class="navLink" href="/">Genres &dtrif;</a>
             </li>
           </ul>
@@ -45,22 +48,24 @@
 
     <!-- content -->
     <!-- Now Playing Section -->
-    <section class="now-playing">
+    <!-- <section class="now-playing">
       <h2>Now Playing</h2>
       <div class="swiper">
         <div class="swiper-wrapper"></div>
       </div>
-    </section>
+    </section> -->
 
     <!-- Search Movies -->
     <section class="search">
       <div class="container">
         <div id="alert"></div>
         <form action="/search.html" class="search-form">
-          <!-- movies and shows radio box -->
+          <!-- movies radio box -->
           <div class="search-radio">
             <input type="radio" id="movie" name="type" value="movie" checked />
             <label for="movies">Movies</label>
+            <input type="radio" id="tv" name="type" value="tv" />
+            <label for="shows">TV Shows</label>
           </div>
           <div class="search-flex">
             <input
@@ -70,7 +75,7 @@
               placeholder="Search a movie..."
             />
             <button class="btn" type="submit">
-              <i class="fas fa-search"></i>
+              <i class="fa fa-search"></i>
             </button>
           </div>
         </form>
@@ -91,6 +96,5 @@
         <p class="copyright">Copyright 2023 || Edgemony ✨</p>
       </section>
     </footer>
-    <div class="spinner"></div>
   </body>
 </html>

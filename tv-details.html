@@ -5,9 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StarMovies - The Cinephile Galaxy ✨</title>
-    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="/assets/images/favicon/favicon.ico"
+    />
+    <link rel="stylesheet" href="./css/app.css" />
     <script src="https://use.fontawesome.com/e2a1ad3188.js"></script>
-    <script src="/js/app.js" defer></script>
+    <script src="./js/app.js" type="module"></script>
   </head>
   <body>
     <header class="containerHeader">
@@ -28,6 +33,9 @@
               <a class="navLink" href="/">Movies</a>
             </li>
             <li>
+              <a class="navLink" href="/shows.html">TV Shows</a>
+            </li>
+            <li>
               <a class="navLink" href="/">Genres &dtrif;</a>
             </li>
           </ul>
@@ -35,13 +43,13 @@
       </div>
     </header>
 
-    <!-- Movie Details -->
+    <!-- Show Details -->
     <section class="container">
       <div class="back">
-        <a class="btn" href="index.html">Back To Movies</a>
+        <a class="btn" href="shows.html">Back To TV Shows</a>
       </div>
-      <!-- Movie Details Output -->
-      <div id="movie-details"></div>
+      <!-- Show Details Output -->
+      <div id="show-details"></div>
     </section>
 
     <!-- Footer -->

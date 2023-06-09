@@ -46,7 +46,7 @@ async function displayPopularMovies() {
 
     const vote = cE("p");
     const starIcon = cE("i");
-    starIcon.classList.add("fas", "fa-star", "text_primary");
+    starIcon.classList.add("fa", "fa-star", "star_primary");
     vote.textContent = movie.vote_average + "/10 ";
     vote.appendChild(starIcon);
 
@@ -55,6 +55,52 @@ async function displayPopularMovies() {
     div.appendChild(cardBody);
 
     popularMoviesContainer.appendChild(div);
+  });
+}
+
+// Display 20 most popular tv shows
+
+async function displayPopularShows() {
+  const { results } = await fetchAPIData("tv/popular");
+  const popularShowsContainer = document.querySelector("#popular-shows");
+
+  results.forEach((show) => {
+    const div = document.createElement("div");
+    div.classList.add("card");
+
+    const link = document.createElement("a");
+    link.href = `tv-details.html?id=${show.id}`;
+
+    const img = document.createElement("img");
+    img.classList.add("card-img-top");
+    img.alt = show.name;
+    img.src = show.poster_path
+      ? `https://image.tmdb.org/t/p/w500${show.poster_path}`
+      : "../images/no-image.jpg";
+
+    link.appendChild(img);
+    div.appendChild(link);
+
+    const cardBody = document.createElement("div");
+    cardBody.classList.add("card-body");
+
+    const title = document.createElement("h5");
+    title.classList.add("card-title");
+    title.textContent = show.name;
+
+    const airDate = document.createElement("p");
+    airDate.classList.add("card-text");
+    const airDateText = document.createElement("small");
+    airDateText.classList.add("text-muted");
+    airDateText.textContent = `Air Date: ${show.first_air_date}`;
+    airDate.appendChild(airDateText);
+
+    cardBody.appendChild(title);
+    cardBody.appendChild(airDate);
+
+    div.appendChild(cardBody);
+
+    popularShowsContainer.appendChild(div);
   });
 }
 
@@ -78,7 +124,7 @@ async function displayMovieDetails() {
   if (movie.poster_path) {
     image.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
   } else {
-    image.src = "../images/no-image.jpg";
+    image.src = "../assets/images/no-image.png";
   }
 
   imageDiv.appendChild(image);
@@ -90,7 +136,7 @@ async function displayMovieDetails() {
 
   const vote = cE("p");
   const starIcon = cE("i");
-  starIcon.classList.add("fas", "fa-star", "text_primary");
+  starIcon.classList.add("fa", "fa-star", "text_primary");
   vote.textContent = movie.vote_average + "/10 "; ///////////////////////////////////// toFixed(1)?????????
   vote.appendChild(starIcon);
 
@@ -131,13 +177,111 @@ async function displayMovieDetails() {
   document.querySelector("#movie-details").appendChild(div);
 }
 
+// Display Show Details // not working
+async function displayShowDetails() {
+  const showId = window.location.search.split("=")[1];
+  const show = await fetchAPIData(`tv/${showId}`);
+  const detailsContainer = document.querySelector("#show-details");
+
+  // Overlay for background image
+  displayBackgroundImage("tv", show.backdrop_path);
+
+  const detailsTopDiv = document.createElement("div");
+  detailsTopDiv.classList.add("details-top");
+
+  const imageDiv = document.createElement("div");
+  const imageSrc = show.poster_path
+    ? `https://image.tmdb.org/t/p/w500${show.poster_path}`
+    : "../images/no-image.jpg";
+  const imageAlt = show.name;
+  const image = document.createElement("img");
+  image.classList.add("card-img-top");
+  image.setAttribute("src", imageSrc);
+  image.setAttribute("alt", imageAlt);
+  imageDiv.appendChild(image);
+
+  const infoDiv = document.createElement("div");
+  const title = document.createElement("h2");
+  title.textContent = show.name;
+  const rating = document.createElement("p");
+  rating.innerHTML = `<i class="fas fa-star text-primary"></i> ${show.vote_average.toFixed(
+    1
+  )} / 10`;
+  const lastAirDate = document.createElement("p");
+  lastAirDate.classList.add("text-muted");
+  lastAirDate.textContent = `Last Air Date: ${show.last_air_date}`;
+  const overview = document.createElement("p");
+  overview.textContent = show.overview;
+  const genresTitle = document.createElement("h5");
+  genresTitle.textContent = "Genres";
+  const genresList = document.createElement("ul");
+  genresList.classList.add("list-group");
+  show.genres.forEach((genre) => {
+    const genreItem = document.createElement("li");
+    genreItem.textContent = genre.name;
+    genresList.appendChild(genreItem);
+  });
+  const homepageLink = document.createElement("a");
+  homepageLink.setAttribute("href", show.homepage);
+  homepageLink.setAttribute("target", "_blank");
+  homepageLink.classList.add("btn");
+  homepageLink.textContent = "Visit show Homepage";
+
+  infoDiv.appendChild(title);
+  infoDiv.appendChild(rating);
+  infoDiv.appendChild(lastAirDate);
+  infoDiv.appendChild(overview);
+  infoDiv.appendChild(genresTitle);
+  infoDiv.appendChild(genresList);
+  infoDiv.appendChild(homepageLink);
+
+  detailsTopDiv.appendChild(imageDiv);
+  detailsTopDiv.appendChild(infoDiv);
+
+  const detailsBottomDiv = document.createElement("div");
+  detailsBottomDiv.classList.add("details-bottom");
+
+  const showInfoTitle = document.createElement("h2");
+  showInfoTitle.textContent = "Show Info";
+
+  const showInfoList = document.createElement("ul");
+  const numOfEpisodesItem = document.createElement("li");
+  numOfEpisodesItem.innerHTML = `<span class="text-secondary">Number of Episodes:</span> ${show.number_of_episodes}`;
+  const lastEpisodeItem = document.createElement("li");
+  lastEpisodeItem.innerHTML = `<span class="text-secondary">Last Episode To Air:</span> ${show.last_episode_to_air.name}`;
+  const statusItem = document.createElement("li");
+  statusItem.innerHTML = `<span class="text-secondary">Status:</span> ${show.status}`;
+
+  showInfoList.appendChild(numOfEpisodesItem);
+  showInfoList.appendChild(lastEpisodeItem);
+  showInfoList.appendChild(statusItem);
+
+  const productionCompaniesTitle = document.createElement("h4");
+  productionCompaniesTitle.textContent = "Production Companies";
+
+  const productionCompaniesDiv = document.createElement("div");
+  productionCompaniesDiv.classList.add("list-group");
+  show.production_companies.forEach((company) => {
+    const companySpan = document.createElement("span");
+    companySpan.textContent = company.name;
+    productionCompaniesDiv.appendChild(companySpan);
+  });
+
+  detailsBottomDiv.appendChild(showInfoTitle);
+  detailsBottomDiv.appendChild(showInfoList);
+  detailsBottomDiv.appendChild(productionCompaniesTitle);
+  detailsBottomDiv.appendChild(productionCompaniesDiv);
+
+  detailsContainer.appendChild(detailsTopDiv);
+  detailsContainer.appendChild(detailsBottomDiv);
+}
+
 // Display Backdrop On Details Pages
 function displayBackgroundImage(type, backgroundPath) {
   const overlayDiv = document.createElement("div");
   overlayDiv.style.backgroundImage = `url(https://image.tmdb.org/t/p/original/${backgroundPath})`;
   overlayDiv.style.backgroundSize = "cover";
   overlayDiv.style.backgroundPosition = "center";
-  overlayDiv.style.backgroundRepeat = "no-repeat";
   overlayDiv.style.height = "100vh";
   overlayDiv.style.width = "100vw";
   overlayDiv.style.position = "absolute";
@@ -148,12 +292,10 @@ function displayBackgroundImage(type, backgroundPath) {
 
   if (type === "movie") {
     document.querySelector("#movie-details").appendChild(overlayDiv);
-  } else {
-    document.querySelector("#show-details").appendChild(overlayDiv);
-  }
+  } //futura implementazione tv shows
 }
 
-// Search Movies/Shows
+// Search Movies/Shows --> futura implementazione serie tv
 async function search() {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
@@ -302,29 +444,25 @@ function displayPagination() {
   });
 }
 
-// Display Movies
+/* // Display Movies
 async function displaySlider() {
   const { results } = await fetchAPIData("movie/now_playing");
 
   results.forEach((movie) => {
-    const { title, poster_path, vote_average, overview } = movie; ////////////////////////
+    const { title, poster_path, vote_average, overview } = movie;
   });
-}
+} */
 
 // Fetch data from TMDB API
 async function fetchAPIData(endpoint) {
   const API_KEY = global.api.apiKey;
   const API_URL = global.api.apiUrl;
 
-  showSpinner();
-
   const response = await fetch(
     `${API_URL}${endpoint}?api_key=${API_KEY}&language=en-US`
   );
 
   const data = await response.json();
-
-  hideSpinner();
 
   return data;
 }
@@ -334,25 +472,13 @@ async function searchAPIData() {
   const API_KEY = global.api.apiKey;
   const API_URL = global.api.apiUrl;
 
-  showSpinner();
-
   const response = await fetch(
     `${API_URL}search/${global.search.type}?api_key=${API_KEY}&language=en-US&query=${global.search.term}&page=${global.search.page}`
   );
 
   const data = await response.json();
 
-  hideSpinner();
-
   return data;
-}
-
-function showSpinner() {
-  document.querySelector(".spinner").classList.add("show");
-}
-
-function hideSpinner() {
-  document.querySelector(".spinner").classList.remove("show");
 }
 
 // Highlight active link
@@ -379,12 +505,35 @@ function addCommasToNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+/**********Movie by Genres feature :///// ***********/
+
+/* const movieGenres = {
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Science Fiction",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western",
+}; */
+
 // Init App
 function init() {
   switch (global.currentPage) {
     case "/":
     case "/index.html":
-      displaySlider();
       displayPopularMovies();
       break;
     case "/movie-details.html":

@@ -15,17 +15,10 @@
 .content {
 }
 
-.sidebar {
-}
-
 /* media query mobile and tablet */
 @media screen and (max-width: 1024px) {
   .mainContent {
     width: 100%;
-  }
-
-  .sidebar {
-    display: none;
   }
 }
 

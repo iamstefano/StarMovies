@@ -5,9 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StarMovies - The Cinephile Galaxy ✨</title>
-    <link rel="stylesheet" href="lib/fontawesome.css" />
-    <link rel="stylesheet" href="css/app.css" />
-    <script src="/js/app.js" defer></script>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="/assets/images/favicon/favicon.ico"
+    />
+    <link rel="stylesheet" href="./css/app.css" />
+    <script src="https://use.fontawesome.com/e2a1ad3188.js"></script>
+    <script src="./js/app.js" type="module"></script>
   </head>
   <body>
     <header class="containerHeader">
@@ -25,6 +30,9 @@
               <a class="navLink" href="/">Movies</a>
             </li>
             <li>
+              <a class="navLink" href="/shows.html">TV Shows</a>
+            </li>
+            <li>
               <a class="navLink" href="/">Genres &dtrif;</a>
             </li>
           </ul>
@@ -40,6 +48,8 @@
           <div class="search-radio">
             <input type="radio" id="movie" name="type" value="movie" checked />
             <label for="movies">Movies</label>
+            <input type="radio" id="tv" name="type" value="tv" />
+            <label for="shows">TV Shows</label>
           </div>
           <div class="search-flex">
             <input
@@ -49,7 +59,7 @@
               placeholder="Enter search term"
             />
             <button class="btn" type="submit">
-              <i class="fas fa-search"></i>
+              <i class="fa fa-search"></i>
             </button>
           </div>
         </form>
@@ -69,7 +79,7 @@
         <p class="copyright">Copyright 2023 || Edgemony ✨</p>
       </section>
     </footer>
-
-    <div class="spinner"></div>
+    <!-- 
+    
   </body>
 </html>
