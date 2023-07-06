@@ -453,6 +453,10 @@ async function displaySlider() {
   });
 } */
 
+// Display Slider Movies // Swiper
+async function displaySlider() {
+  const { results } = await fetchAPIData('movie/now_playing');
+
 // Fetch data from TMDB API
 async function fetchAPIData(endpoint) {
   const API_KEY = global.api.apiKey;
