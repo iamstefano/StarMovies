@@ -482,9 +482,9 @@ async function displaySlider() {
     div.appendChild(rating);
 
     swiperWrapper.appendChild(div);
-  });
 
-  initSwiper();
+    initSwiper();
+  });
 }
 
 function initSwiper() {
@@ -594,6 +594,9 @@ function init() {
     case "/index.html":
       displaySlider();
       displayPopularMovies();
+      break;
+    case "/shows.html":
+      displayPopularShows();
       break;
     case "/movie-details.html":
       displayMovieDetails();
