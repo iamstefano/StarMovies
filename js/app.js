@@ -476,7 +476,7 @@ async function displaySlider() {
     rating.textContent = ` ${movie.vote_average} / 10`;
 
     const starIcon = document.createElement("i");
-    starIcon.classList.add("fas", "fa-star", "text-secondary");
+    starIcon.classList.add("fa", "fa-star", "text-secondary");
     rating.insertBefore(starIcon, rating.firstChild);
 
     div.appendChild(rating);
