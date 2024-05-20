@@ -47,7 +47,7 @@ async function displayPopularMovies() {
     const vote = cE("p");
     const starIcon = cE("i");
     starIcon.classList.add("fa", "fa-star", "star_primary");
-    vote.textContent = movie.vote_average + "/10 ";
+    vote.textContent = `${movie.vote_average.toFixed(2)}/10`;
     vote.appendChild(starIcon);
 
     cardBody.appendChild(title);
@@ -137,7 +137,7 @@ async function displayMovieDetails() {
   const vote = cE("p");
   const starIcon = cE("i");
   starIcon.classList.add("fa", "fa-star", "text_primary");
-  vote.textContent = movie.vote_average + "/10 "; ///////////////////////////////////// toFixed(1)?????????
+  vote.textContent = `${movie.vote_average.toFixed(2)} /10 `; ///////////////////////////////////// toFixed(1)?????????
   vote.appendChild(starIcon);
 
   const releaseDate = cE("p");
@@ -205,7 +205,7 @@ async function displayShowDetails() {
   title.textContent = show.name;
   const rating = document.createElement("p");
   rating.innerHTML = `<i class="fas fa-star text-primary"></i> ${show.vote_average.toFixed(
-    1
+    2
   )} / 10`;
   const lastAirDate = document.createElement("p");
   lastAirDate.classList.add("text-muted");
@@ -473,7 +473,7 @@ async function displaySlider() {
 
     const rating = document.createElement("h4");
     rating.classList.add("swiper-rating");
-    rating.textContent = ` ${movie.vote_average} / 10`;
+    rating.textContent = ` ${movie.vote_average.toFixed(2)} / 10`;
 
     const starIcon = document.createElement("i");
     starIcon.classList.add("fa", "fa-star", "text-secondary");
