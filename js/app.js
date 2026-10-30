@@ -1,7 +1,8 @@
 const cE = (type) => document.createElement(type);
+const LIBRARY_STORAGE_KEY = "starmovies-library-v1";
 
 const global = {
-  currentPage: window.location.pathname,
+  currentPage: window.location.pathname.split("/").pop() || "index.html",
   search: {
     term: "",
     type: "",
@@ -15,47 +16,267 @@ const global = {
   },
 };
 
+function getLibrary() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(LIBRARY_STORAGE_KEY) || "{}");
+    return stored && typeof stored === "object" && !Array.isArray(stored)
+      ? stored
+      : {};
+  } catch (error) {
+    console.warn("Impossibile leggere la raccolta locale.", error);
+    return {};
+  }
+}
+
+function saveLibrary(library) {
+  try {
+    localStorage.setItem(LIBRARY_STORAGE_KEY, JSON.stringify(library));
+    return true;
+  } catch (error) {
+    showAlert("Spazio locale non disponibile: modifiche non salvate.");
+    return false;
+  }
+}
+
+function libraryItemKey(type, id) {
+  return type === "tv" ? `tv-${id}` : String(id);
+}
+
+function getLibraryItem(type, id) {
+  const library = getLibrary();
+  return library[libraryItemKey(type, id)] || {};
+}
+
+function updateLibraryItem(media, type, changes) {
+  const library = getLibrary();
+  const id = libraryItemKey(type, media.id);
+  const previous = library[id] || (type === "movie" ? library[String(media.id)] : {}) || {};
+  library[id] = {
+    ...previous,
+    id: media.id,
+    type,
+    title: (type === "tv" ? media.name : media.title) || previous.title || "Titolo non disponibile",
+    poster_path: media.poster_path ?? previous.poster_path ?? null,
+    release_date: (type === "tv" ? media.first_air_date : media.release_date) || previous.release_date || "",
+    vote_average: media.vote_average ?? previous.vote_average ?? 0,
+    ...changes,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (!library[id].favorite && !library[id].watched && !library[id].rating && !library[id].comment) {
+    delete library[id];
+  }
+
+  return saveLibrary(library) ? library[id] || {} : null;
+}
+
+function createMediaCard(media, type = "movie") {
+  const entry = getLibraryItem(type, media.id);
+  const titleText = media.title || media.name || "Titolo non disponibile";
+  const releaseDate = media.release_date || media.first_air_date;
+  const card = cE("article");
+  card.className = "card";
+
+  const link = cE("a");
+  link.className = "card-media-link";
+  link.href = `${type === "tv" ? "tv" : "movie"}-details.html?id=${encodeURIComponent(media.id)}`;
+  link.setAttribute("aria-label", `Apri i dettagli di ${titleText}`);
+
+  const image = cE("img");
+  image.src = media.poster_path
+    ? `https://image.tmdb.org/t/p/w500${media.poster_path}`
+    : "./assets/images/no-image.png";
+  image.className = "card-img-top";
+  image.alt = `Locandina di ${titleText}`;
+  image.loading = "lazy";
+  link.appendChild(image);
+
+  const typeBadge = cE("span");
+  typeBadge.className = "media-type-badge";
+  typeBadge.textContent = type === "tv" ? "SERIE TV" : "FILM";
+  link.appendChild(typeBadge);
+  card.appendChild(link);
+
+  const body = cE("div");
+  body.className = "card-body";
+  const title = cE("h3");
+  title.className = "card-title";
+  title.textContent = titleText;
+  body.appendChild(title);
+
+  const rating = cE("p");
+  rating.className = "card-text";
+  rating.textContent = `★ ${Number(media.vote_average || 0).toFixed(1)} / 10${releaseDate ? ` · ${releaseDate.slice(0, 4)}` : ""}`;
+  body.appendChild(rating);
+
+  if (entry.rating) {
+    const personalRating = cE("p");
+    personalRating.className = "personal-card-note";
+    personalRating.textContent = `Il tuo voto: ${entry.rating}/10`;
+    body.appendChild(personalRating);
+  }
+
+  const favoriteButton = cE("button");
+  favoriteButton.type = "button";
+  favoriteButton.className = "btn favorite-toggle";
+  favoriteButton.textContent = entry.favorite ? "♥ Nei preferiti" : "♡ Aggiungi ai preferiti";
+  favoriteButton.setAttribute("aria-pressed", String(Boolean(entry.favorite)));
+  favoriteButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const current = getLibraryItem(type, media.id);
+    const updated = updateLibraryItem(media, type, { favorite: !current.favorite });
+    const isFavorite = updated ? Boolean(updated.favorite) : Boolean(current.favorite);
+    favoriteButton.textContent = isFavorite ? "♥ Nei preferiti" : "♡ Aggiungi ai preferiti";
+    favoriteButton.setAttribute("aria-pressed", String(isFavorite));
+    if (!isFavorite && global.currentPage === "favorites.html") displayFavorites();
+  });
+  body.appendChild(favoriteButton);
+  card.appendChild(body);
+  return card;
+}
+
+function createMovieCard(movie) {
+  return createMediaCard(movie, "movie");
+}
+
+function renderPersonalMediaTools(media, type, container) {
+  const existing = getLibraryItem(type, media.id);
+  const section = cE("section");
+  section.className = "personal-tools";
+  section.setAttribute("aria-labelledby", "personal-tools-title");
+
+  const heading = cE("h2");
+  heading.id = "personal-tools-title";
+  heading.textContent = "La tua scheda";
+  section.appendChild(heading);
+
+  const actions = cE("div");
+  actions.className = "personal-actions";
+  const favoriteButton = cE("button");
+  favoriteButton.type = "button";
+  favoriteButton.className = "btn favorite-toggle";
+  favoriteButton.setAttribute("aria-pressed", String(Boolean(existing.favorite)));
+  const syncFavoriteButton = () => {
+    favoriteButton.textContent = favoriteButton.getAttribute("aria-pressed") === "true"
+      ? "♥ Rimuovi dai preferiti"
+      : "♡ Aggiungi ai preferiti";
+  };
+  syncFavoriteButton();
+  favoriteButton.addEventListener("click", () => {
+    const current = getLibraryItem(type, media.id);
+    const updated = updateLibraryItem(media, type, { favorite: !current.favorite });
+    const isFavorite = updated ? Boolean(updated.favorite) : Boolean(current.favorite);
+    favoriteButton.setAttribute("aria-pressed", String(isFavorite));
+    syncFavoriteButton();
+  });
+
+  const watchedLabel = cE("label");
+  watchedLabel.className = "watched-toggle";
+  const watchedInput = cE("input");
+  watchedInput.type = "checkbox";
+  watchedInput.checked = Boolean(existing.watched);
+  watchedInput.addEventListener("change", () => {
+    updateLibraryItem(media, type, { watched: watchedInput.checked });
+  });
+  watchedLabel.append(watchedInput, document.createTextNode(type === "tv" ? " L'ho vista" : " L'ho visto"));
+  actions.append(favoriteButton, watchedLabel);
+  section.appendChild(actions);
+
+  const form = cE("form");
+  form.className = "personal-review-form";
+  const ratingLabel = cE("label");
+  ratingLabel.htmlFor = "personal-rating";
+  ratingLabel.textContent = "Il tuo voto (1–10)";
+  const ratingInput = cE("select");
+  ratingInput.id = "personal-rating";
+  ratingInput.name = "rating";
+  ratingInput.required = true;
+  const placeholder = cE("option");
+  placeholder.value = "";
+  placeholder.textContent = "Scegli un voto";
+  ratingInput.appendChild(placeholder);
+  for (let score = 10; score >= 1; score -= 1) {
+    const option = cE("option");
+    option.value = String(score);
+    option.textContent = `${score} / 10`;
+    ratingInput.appendChild(option);
+  }
+  if (existing.rating) ratingInput.value = String(existing.rating);
+
+  const commentLabel = cE("label");
+  commentLabel.htmlFor = "personal-comment";
+  commentLabel.textContent = "Il tuo commento";
+  const commentInput = cE("textarea");
+  commentInput.id = "personal-comment";
+  commentInput.name = "comment";
+  commentInput.rows = 4;
+  commentInput.maxLength = 1000;
+  commentInput.placeholder = "Annota cosa ne pensi (solo su questo dispositivo)…";
+  commentInput.value = existing.comment || "";
+
+  const saveButton = cE("button");
+  saveButton.type = "submit";
+  saveButton.className = "btn btn-primary";
+  saveButton.textContent = "Salva la scheda";
+  const status = cE("p");
+  status.className = "personal-save-status";
+  status.setAttribute("aria-live", "polite");
+
+  form.append(ratingLabel, ratingInput, commentLabel, commentInput, saveButton, status);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const saved = updateLibraryItem(media, type, {
+      rating: Number(ratingInput.value),
+      comment: commentInput.value.trim(),
+    });
+    status.textContent = saved?.rating ? "Scheda salvata su questo dispositivo." : "Impossibile salvare la scheda.";
+  });
+  section.appendChild(form);
+  container.appendChild(section);
+}
+
+function renderPersonalMovieTools(movie, container) {
+  renderPersonalMediaTools(movie, "movie", container);
+}
+
+function displayFavorites() {
+  const container = document.querySelector("#favorite-movies");
+  container.replaceChildren();
+  const favorites = Object.values(getLibrary()).filter((media) => media.favorite);
+  const count = document.querySelector("#favorites-count");
+  count.textContent = `${favorites.length} ${favorites.length === 1 ? "titolo" : "titoli"} nei preferiti`;
+  if (!favorites.length) {
+    const empty = cE("p");
+    empty.className = "empty-state";
+    empty.textContent = "La tua lista è vuota. Aggiungi film o serie TV ai preferiti dalle schede o dai risultati.";
+    container.appendChild(empty);
+    return;
+  }
+
+  favorites
+    .sort((a, b) => a.title.localeCompare(b.title, "it"))
+    .forEach((media) => {
+      const type = media.type === "tv" ? "tv" : "movie";
+      const card = createMediaCard(media, type);
+      const review = getLibraryItem(type, media.id);
+      if (review.watched || review.comment) {
+        const note = cE("p");
+        note.className = "personal-card-note";
+        note.textContent = review.watched
+          ? `${type === "tv" ? "Vista" : "Visto"}${review.comment ? ` · ${review.comment}` : ""}`
+          : review.comment;
+        card.querySelector(".card-body").appendChild(note);
+      }
+      container.appendChild(card);
+    });
+}
+
 // Display 20 most popular movies
 async function displayPopularMovies() {
   const { results } = await fetchAPIData("movie/popular");
   const popularMoviesContainer = document.querySelector("#popular-movies");
-
-  results.forEach((movie) => {
-    const div = cE("div");
-    div.className = "card";
-
-    const link = cE("a");
-    link.href = `movie-details.html?id=${movie.id}`;
-
-    const img = cE("img");
-    img.src = movie.poster_path
-      ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-      : "../images/no-image.jpg";
-    img.className = "card-img-top";
-    img.alt = movie.title;
-
-    link.appendChild(img);
-    div.appendChild(link);
-
-    const cardBody = cE("div");
-    cardBody.className = "card-body";
-
-    const title = cE("h5");
-    title.className = "card-title";
-    title.textContent = movie.title;
-
-    const vote = cE("p");
-    const starIcon = cE("i");
-    starIcon.classList.add("fa", "fa-star", "star_primary");
-    vote.textContent = `${movie.vote_average.toFixed(2)}/10`;
-    vote.appendChild(starIcon);
-
-    cardBody.appendChild(title);
-    cardBody.appendChild(vote);
-    div.appendChild(cardBody);
-
-    popularMoviesContainer.appendChild(div);
-  });
+  results.forEach((movie) => popularMoviesContainer.appendChild(createMovieCard(movie)));
 }
 
 // Display 20 most popular tv shows
@@ -63,45 +284,7 @@ async function displayPopularMovies() {
 async function displayPopularShows() {
   const { results } = await fetchAPIData("tv/popular");
   const popularShowsContainer = document.querySelector("#popular-shows");
-
-  results.forEach((show) => {
-    const div = document.createElement("div");
-    div.classList.add("card");
-
-    const link = document.createElement("a");
-    link.href = `tv-details.html?id=${show.id}`;
-
-    const img = document.createElement("img");
-    img.classList.add("card-img-top");
-    img.alt = show.name;
-    img.src = show.poster_path
-      ? `https://image.tmdb.org/t/p/w500${show.poster_path}`
-      : "../images/no-image.jpg";
-
-    link.appendChild(img);
-    div.appendChild(link);
-
-    const cardBody = document.createElement("div");
-    cardBody.classList.add("card-body");
-
-    const title = document.createElement("h5");
-    title.classList.add("card-title");
-    title.textContent = show.name;
-
-    const airDate = document.createElement("p");
-    airDate.classList.add("card-text");
-    const airDateText = document.createElement("small");
-    airDateText.classList.add("text-muted");
-    airDateText.textContent = `Air Date: ${show.first_air_date}`;
-    airDate.appendChild(airDateText);
-
-    cardBody.appendChild(title);
-    cardBody.appendChild(airDate);
-
-    div.appendChild(cardBody);
-
-    popularShowsContainer.appendChild(div);
-  });
+  results.forEach((show) => popularShowsContainer.appendChild(createMediaCard(show, "tv")));
 }
 
 // Display Movie Details
@@ -124,7 +307,7 @@ async function displayMovieDetails() {
   if (movie.poster_path) {
     image.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
   } else {
-    image.src = "../assets/images/no-image.png";
+    image.src = "./assets/images/no-image.png";
   }
 
   imageDiv.appendChild(image);
@@ -174,125 +357,124 @@ async function displayMovieDetails() {
 
   div.appendChild(detailsDiv);
 
-  document.querySelector("#movie-details").appendChild(div);
+  const detailsContainer = document.querySelector("#movie-details");
+  detailsContainer.appendChild(div);
+  renderPersonalMovieTools(movie, detailsContainer);
 }
 
 // Display Show Details // not working
 async function displayShowDetails() {
-  const showId = window.location.search.split("=")[1];
+  const showId = new URLSearchParams(window.location.search).get("id");
+  if (!showId) throw new Error("ID serie TV mancante.");
   const show = await fetchAPIData(`tv/${showId}`);
   const detailsContainer = document.querySelector("#show-details");
-
-  // Overlay for background image
   displayBackgroundImage("tv", show.backdrop_path);
+  document.title = `${show.name} · StarMovies`;
 
-  const detailsTopDiv = document.createElement("div");
-  detailsTopDiv.classList.add("details-top");
-
-  const imageDiv = document.createElement("div");
-  const imageSrc = show.poster_path
+  const detailsTop = cE("div");
+  detailsTop.className = "details_top tv-details-top";
+  const poster = cE("img");
+  poster.className = "tv-detail-poster";
+  poster.src = show.poster_path
     ? `https://image.tmdb.org/t/p/w500${show.poster_path}`
-    : "../images/no-image.jpg";
-  const imageAlt = show.name;
-  const image = document.createElement("img");
-  image.classList.add("card-img-top");
-  image.setAttribute("src", imageSrc);
-  image.setAttribute("alt", imageAlt);
-  imageDiv.appendChild(image);
+    : "./assets/images/no-image.png";
+  poster.alt = `Locandina di ${show.name || "serie TV"}`;
+  poster.loading = "eager";
 
-  const infoDiv = document.createElement("div");
-  const title = document.createElement("h2");
-  title.textContent = show.name;
-  const rating = document.createElement("p");
-  rating.innerHTML = `<i class="fas fa-star text-primary"></i> ${show.vote_average.toFixed(
-    2
-  )} / 10`;
-  const lastAirDate = document.createElement("p");
-  lastAirDate.classList.add("text-muted");
-  lastAirDate.textContent = `Last Air Date: ${show.last_air_date}`;
-  const overview = document.createElement("p");
-  overview.textContent = show.overview;
-  const genresTitle = document.createElement("h5");
-  genresTitle.textContent = "Genres";
-  const genresList = document.createElement("ul");
-  genresList.classList.add("list-group");
-  show.genres.forEach((genre) => {
-    const genreItem = document.createElement("li");
-    genreItem.textContent = genre.name;
-    genresList.appendChild(genreItem);
-  });
-  const homepageLink = document.createElement("a");
-  homepageLink.setAttribute("href", show.homepage);
-  homepageLink.setAttribute("target", "_blank");
-  homepageLink.classList.add("btn");
-  homepageLink.textContent = "Visit show Homepage";
+  const info = cE("div");
+  info.className = "tv-detail-copy";
+  const eyebrow = cE("p");
+  eyebrow.className = "eyebrow";
+  eyebrow.textContent = "SERIE TV · GUIDA E RACCOLTA PERSONALE";
+  const title = cE("h1");
+  title.textContent = show.name || "Serie TV";
+  const meta = cE("p");
+  meta.className = "tv-detail-meta";
+  meta.textContent = [
+    `★ ${Number(show.vote_average || 0).toFixed(1)} / 10`,
+    show.first_air_date ? show.first_air_date.slice(0, 4) : "Anno sconosciuto",
+    show.number_of_seasons ? `${show.number_of_seasons} stagioni` : "Stagioni n/d",
+    show.status || "Stato n/d",
+  ].join("  ·  ");
+  const overview = cE("p");
+  overview.className = "tv-detail-overview";
+  overview.textContent = show.overview || "La descrizione non è disponibile.";
 
-  infoDiv.appendChild(title);
-  infoDiv.appendChild(rating);
-  infoDiv.appendChild(lastAirDate);
-  infoDiv.appendChild(overview);
-  infoDiv.appendChild(genresTitle);
-  infoDiv.appendChild(genresList);
-  infoDiv.appendChild(homepageLink);
-
-  detailsTopDiv.appendChild(imageDiv);
-  detailsTopDiv.appendChild(infoDiv);
-
-  const detailsBottomDiv = document.createElement("div");
-  detailsBottomDiv.classList.add("details-bottom");
-
-  const showInfoTitle = document.createElement("h2");
-  showInfoTitle.textContent = "Show Info";
-
-  const showInfoList = document.createElement("ul");
-  const numOfEpisodesItem = document.createElement("li");
-  numOfEpisodesItem.innerHTML = `<span class="text-secondary">Number of Episodes:</span> ${show.number_of_episodes}`;
-  const lastEpisodeItem = document.createElement("li");
-  lastEpisodeItem.innerHTML = `<span class="text-secondary">Last Episode To Air:</span> ${show.last_episode_to_air.name}`;
-  const statusItem = document.createElement("li");
-  statusItem.innerHTML = `<span class="text-secondary">Status:</span> ${show.status}`;
-
-  showInfoList.appendChild(numOfEpisodesItem);
-  showInfoList.appendChild(lastEpisodeItem);
-  showInfoList.appendChild(statusItem);
-
-  const productionCompaniesTitle = document.createElement("h4");
-  productionCompaniesTitle.textContent = "Production Companies";
-
-  const productionCompaniesDiv = document.createElement("div");
-  productionCompaniesDiv.classList.add("list-group");
-  show.production_companies.forEach((company) => {
-    const companySpan = document.createElement("span");
-    companySpan.textContent = company.name;
-    productionCompaniesDiv.appendChild(companySpan);
+  const genres = cE("div");
+  genres.className = "genre-chips";
+  (show.genres || []).forEach((genre) => {
+    const chip = cE("span");
+    chip.className = "genre-chip";
+    chip.textContent = genre.name;
+    genres.appendChild(chip);
   });
 
-  detailsBottomDiv.appendChild(showInfoTitle);
-  detailsBottomDiv.appendChild(showInfoList);
-  detailsBottomDiv.appendChild(productionCompaniesTitle);
-  detailsBottomDiv.appendChild(productionCompaniesDiv);
+  const homepageLink = show.homepage ? cE("a") : null;
+  if (homepageLink) {
+    homepageLink.href = show.homepage;
+    homepageLink.target = "_blank";
+    homepageLink.rel = "noopener noreferrer";
+    homepageLink.className = "btn";
+    homepageLink.textContent = "Sito ufficiale";
+  }
 
-  detailsContainer.appendChild(detailsTopDiv);
-  detailsContainer.appendChild(detailsBottomDiv);
+  info.append(eyebrow, title, meta, overview, genres);
+  if (homepageLink) info.appendChild(homepageLink);
+  detailsTop.append(poster, info);
+
+  const stats = cE("div");
+  stats.className = "tv-stats-grid";
+  const statItems = [
+    ["Episodi", show.number_of_episodes ?? "—"],
+    ["Stagioni", show.number_of_seasons ?? "—"],
+    ["Prima messa in onda", show.first_air_date || "—"],
+    ["Ultima messa in onda", show.last_air_date || "—"],
+  ];
+  statItems.forEach(([label, value]) => {
+    const stat = cE("div");
+    stat.className = "tv-stat-card";
+    const statValue = cE("strong");
+    statValue.textContent = String(value);
+    const statLabel = cE("span");
+    statLabel.textContent = label;
+    stat.append(statValue, statLabel);
+    stats.appendChild(stat);
+  });
+
+  const lowerInfo = cE("div");
+  lowerInfo.className = "tv-production-info";
+  const episode = show.last_episode_to_air;
+  const episodeInfo = cE("p");
+  episodeInfo.textContent = episode?.name
+    ? `Ultimo episodio: ${episode.name}${episode.air_date ? ` · ${episode.air_date}` : ""}`
+    : "Informazioni sull'ultimo episodio non disponibili.";
+  const companyList = cE("p");
+  const companies = (show.production_companies || []).map((company) => company.name).filter(Boolean);
+  companyList.textContent = companies.length ? `Produzione: ${companies.join(" · ")}` : "";
+  lowerInfo.append(episodeInfo);
+  if (companyList.textContent) lowerInfo.appendChild(companyList);
+
+  detailsContainer.append(detailsTop, stats, lowerInfo);
+  renderPersonalMediaTools(show, "tv", detailsContainer);
 }
 
 // Display Backdrop On Details Pages
 function displayBackgroundImage(type, backgroundPath) {
+  if (!backgroundPath) return;
   const overlayDiv = document.createElement("div");
   overlayDiv.style.backgroundImage = `url(https://image.tmdb.org/t/p/original/${backgroundPath})`;
   overlayDiv.style.backgroundSize = "cover";
   overlayDiv.style.backgroundPosition = "center";
   overlayDiv.style.height = "100vh";
-  overlayDiv.style.width = "100vw";
+  overlayDiv.style.width = "100%";
   overlayDiv.style.position = "absolute";
   overlayDiv.style.top = "0";
   overlayDiv.style.left = "0";
   overlayDiv.style.zIndex = "-1";
   overlayDiv.style.opacity = "0.1";
 
-  if (type === "movie") {
-    document.querySelector("#movie-details").appendChild(overlayDiv);
-  } //futura implementazione tv shows
+  const details = document.querySelector(type === "movie" ? "#movie-details" : "#show-details");
+  if (details) details.prepend(overlayDiv);
 }
 
 // Search Movies/Shows --> futura implementazione serie tv
@@ -300,8 +482,12 @@ async function search() {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
 
-  global.search.type = urlParams.get("type");
-  global.search.term = urlParams.get("search-term");
+  global.search.type = urlParams.get("type") === "tv" ? "tv" : "movie";
+  global.search.term = (urlParams.get("search-term") || "").trim();
+  const searchInput = document.querySelector("#search-term");
+  if (searchInput) searchInput.value = global.search.term;
+  const selectedType = document.querySelector(`#${global.search.type}`);
+  if (selectedType) selectedType.checked = true;
 
   if (global.search.term !== "" && global.search.term !== null) {
     const { results, total_pages, page, total_results } = await searchAPIData();
@@ -317,7 +503,6 @@ async function search() {
 
     displaySearchResults(results);
 
-    document.querySelector("#search-term").value = "";
   } else {
     showAlert("Please enter a search term");
   }
@@ -338,46 +523,7 @@ function displaySearchResults(results) {
   pagination.textContent = "";
 
   results.forEach((result) => {
-    const div = document.createElement("div");
-    div.classList.add("card");
-
-    const link = document.createElement("a");
-    link.href = `${global.search.type}-details.html?id=${result.id}`;
-
-    const img = document.createElement("img");
-    img.src = result.poster_path
-      ? `https://image.tmdb.org/t/p/w500${result.poster_path}`
-      : "../images/no-image.jpg";
-    img.classList.add("card-img-top");
-    img.alt = global.search.type === "movie" ? result.title : result.name;
-
-    link.appendChild(img);
-    div.appendChild(link);
-
-    const cardBody = document.createElement("div");
-    cardBody.classList.add("card-body");
-
-    const title = document.createElement("h5");
-    title.classList.add("card-title");
-    title.textContent =
-      global.search.type === "movie" ? result.title : result.name;
-    cardBody.appendChild(title);
-
-    const release = document.createElement("p");
-    release.classList.add("card-text");
-    const small = document.createElement("small");
-    small.classList.add("text-muted");
-    small.textContent =
-      "Release: " +
-      (global.search.type === "movie"
-        ? result.release_date
-        : result.first_air_date);
-    release.appendChild(small);
-    cardBody.appendChild(release);
-
-    div.appendChild(cardBody);
-
-    searchResults.appendChild(div);
+    searchResults.appendChild(createMediaCard(result, global.search.type));
   });
 
   const totalResultsText = `${results.length} of ${global.search.totalResults} Results for ${global.search.term}`;
@@ -483,12 +629,13 @@ async function displaySlider() {
 
     swiperWrapper.appendChild(div);
 
-    initSwiper();
   });
+
+  initSwiper();
 }
 
 function initSwiper() {
-  const swiper = new Swiper(".swiper", {
+  new Swiper(".swiper", {
     slidesPerView: 1,
     spaceBetween: 30,
     freeMode: true,
@@ -516,13 +663,12 @@ async function fetchAPIData(endpoint) {
   const API_KEY = global.api.apiKey;
   const API_URL = global.api.apiUrl;
 
-  const response = await fetch(
-    `${API_URL}${endpoint}?api_key=${API_KEY}&language=en-US`
-  );
-
-  const data = await response.json();
-
-  return data;
+  const url = new URL(`${API_URL}${endpoint}`);
+  url.searchParams.set("api_key", API_KEY);
+  url.searchParams.set("language", "it-IT");
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`TMDB ha restituito ${response.status}`);
+  return response.json();
 }
 
 // Make Request To Search
@@ -530,20 +676,22 @@ async function searchAPIData() {
   const API_KEY = global.api.apiKey;
   const API_URL = global.api.apiUrl;
 
-  const response = await fetch(
-    `${API_URL}search/${global.search.type}?api_key=${API_KEY}&language=en-US&query=${global.search.term}&page=${global.search.page}`
-  );
-
-  const data = await response.json();
-
-  return data;
+  const url = new URL(`${API_URL}search/${global.search.type}`);
+  url.searchParams.set("api_key", API_KEY);
+  url.searchParams.set("language", "it-IT");
+  url.searchParams.set("query", global.search.term);
+  url.searchParams.set("page", global.search.page);
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`TMDB ha restituito ${response.status}`);
+  return response.json();
 }
 
 // Highlight active link
 function highlightActiveLink() {
   const links = document.querySelectorAll(".navLink");
   links.forEach((link) => {
-    if (link.getAttribute("href") === global.currentPage) {
+    const targetPage = new URL(link.href, window.location.href).pathname.split("/").pop() || "index.html";
+    if (targetPage === global.currentPage) {
       link.classList.add("active");
     }
   });
@@ -552,9 +700,10 @@ function highlightActiveLink() {
 // Show Alert
 function showAlert(message, className = "error") {
   const alertEl = cE("div");
-  alertEl.className = "alert";
+  alertEl.className = `alert ${className}`;
   alertEl.appendChild(document.createTextNode(message));
-  document.querySelector("#alert").appendChild(alertEl);
+  const container = document.querySelector("#alert") || document.querySelector("main") || document.body;
+  container.prepend(alertEl);
 
   setTimeout(() => alertEl.remove(), 3000);
 }
@@ -588,22 +737,32 @@ function addCommasToNumber(number) {
 }; */
 
 // Init App
-function init() {
-  switch (global.currentPage) {
-    case "/":
-    case "/index.html":
-      displaySlider();
-      displayPopularMovies();
+async function init() {
+  try {
+    switch (global.currentPage) {
+    case "":
+    case "index.html":
+      await Promise.all([displaySlider(), displayPopularMovies()]);
       break;
-    case "/shows.html":
-      displayPopularShows();
+    case "shows.html":
+      await displayPopularShows();
       break;
-    case "/movie-details.html":
-      displayMovieDetails();
+    case "movie-details.html":
+      await displayMovieDetails();
       break;
-    case "/search.html":
-      search();
+    case "tv-details.html":
+      await displayShowDetails();
       break;
+    case "search.html":
+      await search();
+      break;
+    case "favorites.html":
+      displayFavorites();
+      break;
+    }
+  } catch (error) {
+    console.error("Errore durante il caricamento della pagina.", error);
+    showAlert("Non è stato possibile caricare i contenuti. Controlla la connessione e riprova.");
   }
 
   highlightActiveLink();

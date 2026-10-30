@@ -8,7 +8,7 @@
     <link
       rel="icon"
       type="image/x-icon"
-      href="/assets/images/favicon/favicon.ico"
+      href="./assets/images/favicon/favicon.ico"
     />
     <link rel="stylesheet" href="./css/app.css" />
     <link rel="stylesheet" href="./swiper/swiper.css" />
@@ -22,7 +22,7 @@
     <header class="containerHeader">
       <div class="container">
         <div class="mainLogo">
-          <a href="/">
+          <a href="./index.html">
             <div class="logoWrapper">
               <img
                 src="./assets/images/logo_transparent.png"
@@ -34,11 +34,12 @@
         <div class="nav_wrapper">
           <ul class="nav_ul">
             <li>
-              <a class="navLink" href="/">Movies</a>
+              <a class="navLink" href="./index.html">Movies</a>
             </li>
             <li>
-              <a class="navLink" href="/shows.html">TV Shows</a>
+              <a class="navLink" href="./shows.html">TV Shows</a>
             </li>
+            <li><a class="navLink" href="./favorites.html">Preferiti</a></li>
             <!-- <li>
               <a class="navLink" href="/">Genres &dtrif;</a>
             </li> -->
@@ -49,9 +50,21 @@
     <!-- end header -->
 
     <!-- content -->
+    <section class="page-hero container">
+      <div class="page-hero-content">
+        <p class="eyebrow">STAR MOVIES · LA TUA PROSSIMA STORIA</p>
+        <h1>Ogni visione<br />inizia da qui.</h1>
+        <p>Esplora i titoli del momento, scopri nuove serie e costruisci la tua raccolta personale.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#popular-movies">Esplora i film</a>
+          <a class="btn" href="./shows.html">Scopri le serie</a>
+        </div>
+      </div>
+    </section>
+
     <!-- Now Playing Section -->
     <section class="now_playing">
-      <h2>Now Playing</h2>
+      <div class="section-heading"><h2>In programmazione</h2><p>Le uscite da tenere d'occhio</p></div>
       <div class="swiper">
         <div class="swiper-wrapper"></div>
       </div>
@@ -61,20 +74,20 @@
     <section class="search">
       <div class="container">
         <div id="alert"></div>
-        <form action="/search.html" class="search-form">
-          <!-- movies radio box -->
+        <form action="./search.html" class="search-form">
+          <!-- Scegli il tipo di catalogo da cercare -->
           <div class="search-radio">
             <input type="radio" id="movie" name="type" value="movie" checked />
-            <label for="movies">Movies</label>
+            <label for="movie">Film</label>
             <input type="radio" id="tv" name="type" value="tv" />
-            <label for="shows">TV Shows</label>
+            <label for="tv">Serie TV</label>
           </div>
           <div class="search-flex">
             <input
               type="text"
               name="search-term"
               id="search-term"
-              placeholder="Search a movie..."
+              placeholder="Cerca un film o una serie..."
             />
             <button class="btn" type="submit">
               <i class="fa fa-search"></i>
@@ -86,7 +99,7 @@
 
     <!-- Popular Movies -->
     <section class="container">
-      <h2>Popular Movies</h2>
+      <div class="section-heading"><h2>Film popolari</h2><p>Selezionati dalla community TMDB</p></div>
       <div id="popular-movies" class="grid"></div>
     </section>
 

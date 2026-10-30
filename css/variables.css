@@ -1,12 +1,12 @@
 :root {
-  --color-black: #000000;
-  --color-text: #e7e9ea;
-  --color-text-red: #b82337fd;
-  --color-hover: rgba(239, 243, 244, 0.1);
-  --color-brand: #f15a54;
-  --color-border: rgba(239, 243, 244, 0.2);
-  --color-primary: #020d18;
-  --color-secondary: var(--color-brand);
+  --color-black: #080b13;
+  --color-text: #f2f3fa;
+  --color-text-red: #c4b5fd;
+  --color-hover: rgba(167, 139, 250, 0.12);
+  --color-brand: #8b5cf6;
+  --color-border: rgba(199, 210, 254, 0.14);
+  --color-primary: #111827;
+  --color-secondary: #a78bfa;
   /* Star rating */
   --star-size: 30px;
   --star-color: #fff;

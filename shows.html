@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StarMovies - The Cinephile Galaxy ✨</title>
+    <meta name="theme-color" content="#080b13" />
+    <title>Serie TV · StarMovies</title>
     <link
       rel="icon"
       type="image/x-icon"
-      href="/assets/images/favicon/favicon.ico"
+      href="./assets/images/favicon/favicon.ico"
     />
     <link rel="stylesheet" href="./css/app.css" />
     <script src="https://use.fontawesome.com/e2a1ad3188.js"></script>
@@ -18,7 +19,7 @@
     <header class="containerHeader">
       <div class="container">
         <div class="mainLogo">
-          <a href="/">
+          <a href="./index.html">
             <div class="logoWrapper">
               <img
                 src="./assets/images/logo_transparent.png"
@@ -30,11 +31,12 @@
         <div class="nav_wrapper">
           <ul class="nav_ul">
             <li>
-              <a class="navLink" href="/">Movies</a>
+              <a class="navLink" href="./index.html">Film</a>
             </li>
             <li>
-              <a class="navLink" href="/shows.html">TV Shows</a>
+              <a class="navLink" href="./shows.html">Serie TV</a>
             </li>
+            <li><a class="navLink" href="./favorites.html">Preferiti</a></li>
             <!-- <li>
               <a class="navLink" href="/">Genres &dtrif;</a>
             </li> -->
@@ -43,11 +45,23 @@
       </div>
     </header>
 
-    <!-- Popular TV Shows -->
-    <section class="container">
-      <h2>Popular TV Shows</h2>
-      <div id="popular-shows" class="grid"></div>
-    </section>
+    <main>
+      <section class="page-hero container tv-hero">
+        <div class="page-hero-content">
+          <p class="eyebrow">UN EPISODIO TIRA L'ALTRO</p>
+          <h1>La tua prossima<br />serie preferita.</h1>
+          <p>Scopri le serie più seguite, salva quelle da iniziare e tieni traccia delle tue impressioni.</p>
+          <div class="hero-actions"><a class="btn btn-primary" href="#popular-shows">Esplora le serie</a></div>
+        </div>
+      </section>
+      <section class="container catalog-section">
+        <div class="section-heading">
+          <h2>Serie TV popolari</h2>
+          <p>Informazioni aggiornate da TMDB</p>
+        </div>
+        <div id="popular-shows" class="grid"></div>
+      </section>
+    </main>
 
     <!-- Footer -->
     <footer>

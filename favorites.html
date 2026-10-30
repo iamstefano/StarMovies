@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#080b10" />
+    <meta name="description" content="La tua raccolta personale di film e serie preferiti su StarMovies." />
+    <title>I miei preferiti · StarMovies</title>
+    <link rel="icon" type="image/x-icon" href="./assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="./css/app.css" />
+    <script src="./js/app.js" type="module"></script>
+  </head>
+  <body>
+    <header class="containerHeader">
+      <div class="container">
+        <div class="mainLogo">
+          <a href="./index.html" aria-label="StarMovies, home">
+            <div class="logoWrapper"><img src="./assets/images/logo_transparent.png" alt="StarMovies" /></div>
+          </a>
+        </div>
+        <nav class="nav_wrapper" aria-label="Navigazione principale">
+          <ul class="nav_ul">
+            <li><a class="navLink" href="./index.html">Film</a></li>
+            <li><a class="navLink" href="./shows.html">Serie TV</a></li>
+            <li><a class="navLink" href="./favorites.html">Preferiti</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main class="container favorites-page">
+      <h1>I miei preferiti</h1>
+      <p id="favorites-count" class="favorites-count" aria-live="polite"></p>
+      <div id="favorite-movies" class="grid"></div>
+    </main>
+    <footer><section class="footer"><p class="copyright">StarMovies · La tua raccolta resta su questo dispositivo.</p></section></footer>
+  </body>
+</html>

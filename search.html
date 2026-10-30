@@ -8,7 +8,7 @@
     <link
       rel="icon"
       type="image/x-icon"
-      href="/assets/images/favicon/favicon.ico"
+      href="./assets/images/favicon/favicon.ico"
     />
     <link rel="stylesheet" href="./css/app.css" />
     <script src="https://use.fontawesome.com/e2a1ad3188.js"></script>
@@ -18,7 +18,7 @@
     <header class="containerHeader">
       <div class="container">
         <div class="mainLogo">
-          <a href="/">
+          <a href="./index.html">
             <div class="logoWrapper">
               <img src="./assets/images/logo.png" alt="logo-star-movies" />
             </div>
@@ -27,11 +27,12 @@
         <div class="nav_wrapper">
           <ul class="nav_ul">
             <li>
-              <a class="navLink" href="/">Movies</a>
+              <a class="navLink" href="./index.html">Movies</a>
             </li>
             <li>
-              <a class="navLink" href="/shows.html">TV Shows</a>
+              <a class="navLink" href="./shows.html">TV Shows</a>
             </li>
+            <li><a class="navLink" href="./favorites.html">Preferiti</a></li>
             <!-- <li>
               <a class="navLink" href="/">Genres &dtrif;</a>
             </li> -->
@@ -44,12 +45,12 @@
     <section class="search">
       <div class="container">
         <div id="alert"></div>
-        <form action="/search.html" class="search-form">
+        <form action="./search.html" class="search-form">
           <div class="search-radio">
             <input type="radio" id="movie" name="type" value="movie" checked />
-            <label for="movies">Movies</label>
+            <label for="movie">Movies</label>
             <input type="radio" id="tv" name="type" value="tv" />
-            <label for="shows">TV Shows</label>
+            <label for="tv">TV Shows</label>
           </div>
           <div class="search-flex">
             <input
